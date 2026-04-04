@@ -550,7 +550,7 @@
 </section>
 
 <script>
-function submitToGoogleForm() {
+async function submitToGoogleForm() {
   const parent = document.getElementById('f-parent').value;
   const phone = document.getElementById('f-phone').value;
   const child = document.getElementById('f-child').value;
@@ -563,21 +563,47 @@ function submitToGoogleForm() {
     return;
   }
 
-  // Open Google Form in new tab
-  window.open('https://docs.google.com/forms/d/e/1FAIpQLSeosZ4OCKDV8n8CqiYmJERIxmlMvwStzmMhqkrOsRrcyI_PgA/viewform', '_blank');
+  const btn = document.querySelector('.submit-btn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
 
-  document.getElementById('enroll-form-wrap').innerHTML = \`
-    <div style="text-align:center; padding:2rem 0;">
-      <div style="font-size:3rem; margin-bottom:1rem;">🎉</div>
-      <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; margin-bottom:0.8rem; color:var(--white);">Shukriya!</h3>
-      <p style="color:var(--muted); font-size:0.95rem; line-height:1.7; margin-bottom:1.5rem;">
-        We have received your request. We will contact you on WhatsApp within <strong style="color:var(--purple-light);">24 hours</strong> to confirm your free demo slot.
-      </p>
-      <a href="https://wa.me/918802907960" target="_blank" style="display:inline-flex; align-items:center; gap:0.5rem; background:#25d366; color:white; padding:0.9rem 2rem; border-radius:50px; text-decoration:none; font-weight:600;">
-        💬 Message us on WhatsApp
-      </a>
-    </div>
-  \`;
+  try {
+    const response = await fetch('https://formspree.io/f/mpqoozyn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        'Parent Name': parent,
+        'WhatsApp Number': phone,
+        'Child Name': child,
+        'Child Age': age,
+        'Interested Course': course,
+        'Message': msg
+      })
+    });
+
+    if (response.ok) {
+      document.getElementById('enroll-form-wrap').innerHTML = `
+        <div style="text-align:center; padding:2rem 0;">
+          <div style="font-size:3rem; margin-bottom:1rem;">🎉</div>
+          <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; margin-bottom:0.8rem; color:var(--white);">Shukriya!</h3>
+          <p style="color:var(--muted); font-size:0.95rem; line-height:1.7; margin-bottom:1.5rem;">
+            We have received your request. We will contact you on WhatsApp within <strong style="color:var(--purple-light);">24 hours</strong> to confirm your free demo slot.
+          </p>
+          <a href="https://wa.me/918802907960" target="_blank" style="display:inline-flex; align-items:center; gap:0.5rem; background:#25d366; color:white; padding:0.9rem 2rem; border-radius:50px; text-decoration:none; font-weight:600;">
+            💬 Message us on WhatsApp
+          </a>
+        </div>
+      `;
+    } else {
+      btn.textContent = 'Book My Free Demo Class →';
+      btn.disabled = false;
+      alert('Something went wrong. Please WhatsApp us directly at +91 88029 07960');
+    }
+  } catch(err) {
+    btn.textContent = 'Book My Free Demo Class →';
+    btn.disabled = false;
+    alert('Something went wrong. Please WhatsApp us directly at +91 88029 07960');
+  }
 }
 </script>
 
