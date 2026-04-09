@@ -15,15 +15,11 @@ function applyPricing(countryCode) {
   const badge = document.getElementById('currency-badge');
   if (badge) {
     badge.style.display = 'inline-flex';
-
-    if (countryCode === 'IN') {
-      badge.innerHTML = '🇮🇳 Prices shown in INR';
-    } else {
-      badge.innerHTML = '🌍 International pricing in USD';
-    }
+    badge.innerHTML = countryCode === 'IN'
+      ? '🇮🇳 Prices shown in INR'
+      : '🌍 International pricing in USD';
   }
 
-  // dropdown sync
   const dropdown = document.getElementById('currency-switcher');
   if (dropdown) dropdown.value = countryCode;
 }
@@ -33,28 +29,16 @@ function setCurrency(code) {
   applyPricing(code);
 }
 
-async function initPricing() {
-  // 1. check saved preference
+function initPricing() {
+  // ✅ 1. saved preference
   const saved = localStorage.getItem('selectedCurrency');
   if (saved) {
     applyPricing(saved);
     return;
   }
 
-  // 2. fallback detection (optional, but safe)
-  try {
-    const res = await fetch('https://ipapi.co/json/');
-    const data = await res.json();
-
-    if (data.country_code === 'IN') {
-      applyPricing('IN');
-    } else {
-      applyPricing('US');
-    }
-  } catch (e) {
-    // safest fallback
-    applyPricing('IN');
-  }
+  // ✅ 2. FORCE INR DEFAULT (no IP bullshit)
+  applyPricing('IN');
 }
 
 window.addEventListener('DOMContentLoaded', initPricing);
