@@ -216,7 +216,6 @@
     footer { background: var(--deep); border-top: 1px solid var(--border); text-align: center; padding: 2rem 5%; color: var(--muted); font-size: 0.8rem; position: relative; z-index: 1; }
     footer strong { color: var(--purple-light); }
  
- 
 /* PAYMENT POPUP */
 #pay-popup-overlay {
   display: none;
@@ -294,6 +293,10 @@
   </style>
  
 <script>
+  // =============================================
+  // FIX: Default is now INR (India). If geo-detection
+  // fails or is slow, Indian users always see ₹ prices.
+  // =============================================
   const pricing = {
     IN: { symbol: '&#8377;', p1: '1,499', p2: '1,999', p3: '2,499', w1: '2,000',  w2: '2,800', w3: '3,500' },
     GB: { symbol: '&pound;', p1: '38',    p2: '48',    p3: '58',    w1: '52',     w2: '65',    w3: '78'    },
@@ -308,29 +311,41 @@
     OM: { symbol: 'OMR',     p1: '18',    p2: '22',    p3: '28',    w1: '24',     w2: '29',    w3: '37'    },
     BH: { symbol: 'BHD',     p1: '18',    p2: '22',    p3: '27',    w1: '24',     w2: '29',    w3: '36'    }
   };
-  const DEFAULT = { symbol: '$', p1: '48', p2: '58', p3: '72', w1: '65', w2: '78', w3: '90' };
+
+  // DEFAULT is now INR — so page always loads with ₹ prices
+  const DEFAULT = pricing['IN'];
  
-  async function detectAndSetPricing() {
-    let p = DEFAULT;
-    let countryCode = 'OTHER';
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      const data = await res.json();
-      countryCode = data.country_code || 'OTHER';
-      p = pricing[countryCode] || DEFAULT;
-    } catch(e) {}
- 
+  // Apply INR immediately on script load (before DOMContentLoaded)
+  // so prices are correct from the very first render
+  function applyPricing(p) {
     document.querySelectorAll('[data-price]').forEach(el => {
       const key = el.getAttribute('data-price');
       el.innerHTML = p.symbol + p[key];
     });
- 
+  }
+
+  async function detectAndSetPricing() {
+    // Apply INR immediately as default
+    applyPricing(DEFAULT);
+
+    let countryCode = 'IN';
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      countryCode = data.country_code || 'IN';
+      // Only update if not India (since India is already shown)
+      const p = pricing[countryCode] || DEFAULT;
+      applyPricing(p);
+    } catch(e) {
+      // Geo-detection failed — INR already showing, nothing to do
+    }
+
     const badge = document.getElementById('currency-badge');
     if (badge) {
       const isIndia = countryCode === 'IN';
       badge.innerHTML = isIndia
         ? '🇮🇳 &nbsp;Prices shown for India (INR)'
-        : '🌍 &nbsp;International pricing shown in USD — PayPal converts to your local currency';
+        : '🌍 &nbsp;International pricing shown — PayPal converts to your local currency';
       badge.style.display = 'inline-flex';
     }
   }
@@ -436,7 +451,7 @@
         <li>Monthly progress report</li>
       </ul>
       <div class="course-pricing">
-        <strong data-price="p1">₹1,499</strong><span>/ month</span><span class="was" data-price="w1">₹2,000</span><span style="background:#22c55e;color:white;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:50px;margin-left:0.4rem;">25% OFF</span>
+        <strong data-price="p1">&#8377;1,499</strong><span>/ month</span><span class="was" data-price="w1">&#8377;2,000</span><span style="background:#22c55e;color:white;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:50px;margin-left:0.4rem;">25% OFF</span>
       </div>
       <a id="enroll-p1" href="https://rzp.io/rzp/vCChADZE" target="_blank" style="display:block; text-align:center; margin-top:1.2rem; background:var(--purple); color:white; padding:0.75rem 1rem; border-radius:50px; text-decoration:none; font-weight:600; font-size:0.88rem; transition:all 0.2s;">Enroll Now →</a>
     </div>
@@ -454,7 +469,7 @@
         <li>Monthly progress report</li>
       </ul>
       <div class="course-pricing">
-        <strong data-price="p2">₹1,999</strong><span>/ month</span><span class="was" data-price="w2">₹2,800</span><span style="background:#22c55e;color:white;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:50px;margin-left:0.4rem;">29% OFF</span>
+        <strong data-price="p2">&#8377;1,999</strong><span>/ month</span><span class="was" data-price="w2">&#8377;2,800</span><span style="background:#22c55e;color:white;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:50px;margin-left:0.4rem;">29% OFF</span>
       </div>
       <a id="enroll-p2" href="https://rzp.io/rzp/eHWNnai" target="_blank" style="display:block; text-align:center; margin-top:1.2rem; background:var(--gold); color:var(--black); padding:0.75rem 1rem; border-radius:50px; text-decoration:none; font-weight:600; font-size:0.88rem; transition:all 0.2s;">Enroll Now →</a>
     </div>
@@ -471,7 +486,7 @@
         <li>Monthly progress report</li>
       </ul>
       <div class="course-pricing">
-        <strong data-price="p3">₹2,499</strong><span>/ month</span><span class="was" data-price="w3">₹3,500</span><span style="background:#22c55e;color:white;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:50px;margin-left:0.4rem;">29% OFF</span>
+        <strong data-price="p3">&#8377;2,499</strong><span>/ month</span><span class="was" data-price="w3">&#8377;3,500</span><span style="background:#22c55e;color:white;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:50px;margin-left:0.4rem;">29% OFF</span>
       </div>
       <a id="enroll-p3" href="https://rzp.io/rzp/kRnPrp9" target="_blank" style="display:block; text-align:center; margin-top:1.2rem; background:var(--purple); color:white; padding:0.75rem 1rem; border-radius:50px; text-decoration:none; font-weight:600; font-size:0.88rem; transition:all 0.2s;">Enroll Now →</a>
     </div>
@@ -623,7 +638,7 @@ async function submitToGoogleForm() {
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;max-width:900px;margin:0 auto;">
     <div style="text-align:center;padding:2rem;background:var(--card);border:1px solid var(--border);border-radius:20px;">
       <div style="width:50px;height:50px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.2rem;margin:0 auto 1.2rem;color:white;">1</div>
-      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-bottom:0.5rem;">Only 6 Spots Left</h3>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-bottom:0.5rem;">Book Free Demo</h3>
       <p style="color:var(--muted);font-size:0.85rem;line-height:1.6;">Fill the form or WhatsApp us. We confirm your free 30-min trial class within 24 hours.</p>
     </div>
     <div style="text-align:center;padding:2rem;background:var(--card);border:1px solid var(--purple);border-radius:20px;">
@@ -687,7 +702,7 @@ async function submitToGoogleForm() {
   </div>
 </section>
  
-<!-- BATCH SCHEDULE — CLEAN 3-BATCH VERSION -->
+<!-- BATCH SCHEDULE -->
 <section style="background:var(--deep);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;">
     <div>
@@ -697,7 +712,6 @@ async function submitToGoogleForm() {
       <a href="#enroll" style="display:inline-flex;align-items:center;gap:0.5rem;margin-top:2rem;background:var(--purple);color:white;padding:0.85rem 2rem;border-radius:50px;text-decoration:none;font-weight:600;font-size:0.9rem;box-shadow:0 0 25px rgba(124,58,237,0.35);transition:all 0.2s;">Book Free Demo → Discuss Your Slot</a>
     </div>
     <div style="display:flex;flex-direction:column;gap:1rem;">
-
       <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.4rem 1.5rem;display:flex;justify-content:space-between;align-items:center;">
         <div>
           <div style="font-weight:600;font-size:0.95rem;">🇮🇳 &nbsp;India</div>
@@ -705,7 +719,6 @@ async function submitToGoogleForm() {
         </div>
         <div style="color:var(--purple-light);font-weight:600;font-size:0.82rem;background:rgba(124,58,237,0.12);border:1px solid var(--border);padding:0.3rem 0.9rem;border-radius:50px;white-space:nowrap;">Enrolling Now</div>
       </div>
-
       <div style="background:var(--card);border:1px solid var(--purple);border-radius:16px;padding:1.4rem 1.5rem;display:flex;justify-content:space-between;align-items:center;position:relative;overflow:hidden;">
         <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--purple-light));"></div>
         <div>
@@ -714,7 +727,6 @@ async function submitToGoogleForm() {
         </div>
         <div style="color:var(--purple-light);font-weight:600;font-size:0.82rem;background:rgba(124,58,237,0.12);border:1px solid var(--border);padding:0.3rem 0.9rem;border-radius:50px;white-space:nowrap;">Enrolling Now</div>
       </div>
-
       <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.4rem 1.5rem;display:flex;justify-content:space-between;align-items:center;">
         <div>
           <div style="font-weight:600;font-size:0.95rem;">🌍 &nbsp;Gulf & Rest of World</div>
@@ -722,11 +734,9 @@ async function submitToGoogleForm() {
         </div>
         <div style="color:var(--purple-light);font-weight:600;font-size:0.82rem;background:rgba(124,58,237,0.12);border:1px solid var(--border);padding:0.3rem 0.9rem;border-radius:50px;white-space:nowrap;">Enrolling Now</div>
       </div>
-
       <div style="background:rgba(124,58,237,0.06);border:1px dashed rgba(124,58,237,0.3);border-radius:14px;padding:1rem 1.5rem;text-align:center;">
         <p style="color:var(--muted);font-size:0.82rem;line-height:1.6;">✨ <strong style="color:var(--white);">Exact timings confirmed during your free demo</strong> — we'll find a slot that works perfectly for your family.</p>
       </div>
-
     </div>
   </div>
 </section>
@@ -806,7 +816,6 @@ async function submitToGoogleForm() {
   <p>© 2026 <strong>Urdu Foundation Program</strong> · Online Urdu Classes for Kids Across India · All Rights Reserved</p>
 </footer>
  
- 
 <!-- WHATSAPP FLOATING BUTTON -->
 <a href="https://wa.me/918802907960" target="_blank" id="wa-float"
    style="position:fixed; bottom:28px; right:28px; z-index:9999;
@@ -835,93 +844,14 @@ async function submitToGoogleForm() {
   50% { box-shadow: 0 4px 35px rgba(37,211,102,0.75); transform: scale(1.07); }
 }
 </style>
- 
- 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.querySelector('form[name="demo-booking"]');
-  if (!form) return;
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('submit-btn');
-    btn.textContent = 'Sending...';
-    btn.disabled = true;
- 
-    const formData = new FormData(form);
- 
-    try {
-      await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(formData).toString()
-      });
- 
-      // Show thank you message
-      form.innerHTML = `
-        <div style="text-align:center; padding: 2rem 0;">
-          <div style="font-size:3rem; margin-bottom:1rem;">🎉</div>
-          <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; margin-bottom:0.8rem; color:var(--white);">Shukriya!</h3>
-          <p style="color:var(--muted); font-size:0.95rem; line-height:1.7; margin-bottom:1.5rem;">
-            We have received your request. We will contact you on WhatsApp within <strong style="color:var(--purple-light);">24 hours</strong> to confirm your free demo slot.
-          </p>
-          <a href="https://wa.me/918802907960" target="_blank" style="display:inline-flex; align-items:center; gap:0.5rem; background:#25d366; color:white; padding:0.9rem 2rem; border-radius:50px; text-decoration:none; font-weight:600;">
-            💬 Message us on WhatsApp
-          </a>
-        </div>
-      `;
-    } catch(err) {
-      btn.textContent = 'Book My Free Demo Class →';
-      btn.disabled = false;
-      alert('Something went wrong. Please WhatsApp us directly at +91 88029 07960');
-    }
-  });
-});
-</script>
- 
- 
-<script>
-  const paymentLinks = {
-    IN: {
-      p1: 'https://rzp.io/rzp/vCChADZE',
-      p2: 'https://rzp.io/rzp/eHWNnai',
-      p3: 'https://rzp.io/rzp/kRnPrp9'
-    },
-    DEFAULT: {
-      p1: 'https://www.paypal.com/ncp/payment/L835ZTFRF5JHY',
-      p2: 'https://www.paypal.com/ncp/payment/XD8TPXXNKDHUW',
-      p3: 'https://www.paypal.com/ncp/payment/9KKEFW6CE9LBQ'
-    }
-  };
- 
-  // Override detectAndSetPricing to also update payment links
-  const originalDetect = window._detectDone;
-  async function updatePaymentLinks() {
-    let countryCode = 'DEFAULT';
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      const data = await res.json();
-      countryCode = data.country_code || 'DEFAULT';
-    } catch(e) {}
- 
-    const links = paymentLinks[countryCode] || paymentLinks['DEFAULT'];
- 
-    ['p1','p2','p3'].forEach(key => {
-      const btn = document.getElementById('enroll-' + key);
-      if (btn) btn.href = links[key];
-    });
-  }
- 
-  window.addEventListener('DOMContentLoaded', updatePaymentLinks);
-</script>
- 
- 
+
 <!-- PAYMENT POPUP -->
 <div id="pay-popup-overlay">
   <div id="pay-popup">
     <button id="pay-popup-close" onclick="closePayPopup()">✕</button>
     <h3>Enroll Now</h3>
     <div class="course-name" id="popup-course-name">Little Beginners</div>
-    <div class="amount-inr" id="popup-amount-inr">₹1,499</div>
+    <div class="amount-inr" id="popup-amount-inr">&#8377;1,499</div>
     <div class="amount-converted" id="popup-amount-converted"></div>
     <div class="pay-note" id="popup-pay-note">
       💳 Pay securely with UPI, Debit/Credit Card, or Net Banking.<br/>
@@ -935,22 +865,35 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </div>
- 
- 
+
 <script>
-  let currentPayLink = '';
- 
+  // =============================================
+  // PAYMENT LINKS — India = Razorpay, Others = PayPal
+  // =============================================
+  const paymentLinks = {
+    IN: {
+      p1: 'https://rzp.io/rzp/vCChADZE',
+      p2: 'https://rzp.io/rzp/eHWNnai',
+      p3: 'https://rzp.io/rzp/kRnPrp9'
+    },
+    DEFAULT: {
+      p1: 'https://www.paypal.com/ncp/payment/L835ZTFRF5JHY',
+      p2: 'https://www.paypal.com/ncp/payment/XD8TPXXNKDHUW',
+      p3: 'https://www.paypal.com/ncp/payment/9KKEFW6CE9LBQ'
+    }
+  };
+
   const courseInfo = {
     p1: { name: 'Little Beginners (Ages 6–9)' },
     p2: { name: 'Growing Readers (Ages 10–13)' },
     p3: { name: 'Advanced Scholars (Ages 14–16)' }
   };
- 
+
   const popupPrices = {
     IN: {
-      p1: { inr: '₹1,499', converted: '' },
-      p2: { inr: '₹1,999', converted: '' },
-      p3: { inr: '₹2,499', converted: '' }
+      p1: { inr: '&#8377;1,499/month', converted: '' },
+      p2: { inr: '&#8377;1,999/month', converted: '' },
+      p3: { inr: '&#8377;2,499/month', converted: '' }
     },
     GB: {
       p1: { inr: '£38/month', converted: 'Paid securely via PayPal in GBP' },
@@ -1008,11 +951,20 @@ document.addEventListener('DOMContentLoaded', function() {
       p3: { inr: '$72/month', converted: 'Paid securely via PayPal in USD' }
     }
   };
- 
+
+  // FIX: Default to India so Razorpay links show immediately
   let userCountry = 'IN';
- 
-  // Intercept enroll button clicks
+  let currentPayLink = '';
+
   document.addEventListener('DOMContentLoaded', function() {
+    // Apply India payment links immediately
+    const indiaLinks = paymentLinks['IN'];
+    ['p1','p2','p3'].forEach(key => {
+      const btn = document.getElementById('enroll-' + key);
+      if (btn) btn.href = indiaLinks[key];
+    });
+
+    // Attach popup click listeners
     ['p1','p2','p3'].forEach(key => {
       const btn = document.getElementById('enroll-' + key);
       if (btn) {
@@ -1023,24 +975,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
     });
- 
-    // Get country
+
+    // Detect country in background, update if not India
     fetch('https://ipapi.co/json/')
       .then(r => r.json())
-      .then(d => { userCountry = d.country_code || 'IN'; })
+      .then(d => {
+        userCountry = d.country_code || 'IN';
+        if (userCountry !== 'IN') {
+          // Update payment links for international users
+          const links = paymentLinks[userCountry] || paymentLinks['DEFAULT'];
+          ['p1','p2','p3'].forEach(key => {
+            const btn = document.getElementById('enroll-' + key);
+            if (btn) btn.href = links[key];
+          });
+          // Update PayPal button label
+          const popupBtn = document.getElementById('pay-popup-btn');
+          if (popupBtn) {
+            popupBtn.textContent = 'Pay with PayPal →';
+            popupBtn.style.background = '#0070ba';
+          }
+        }
+      })
       .catch(() => { userCountry = 'IN'; });
   });
- 
+
   function openPayPopup(courseKey) {
-    const prices = (popupPrices[userCountry] || popupPrices['DEFAULT'])[courseKey];
+    const countryPrices = popupPrices[userCountry] || popupPrices['IN'];
+    const prices = countryPrices[courseKey];
     const course = courseInfo[courseKey];
+
     document.getElementById('popup-course-name').textContent = course.name;
-    document.getElementById('popup-amount-inr').textContent = prices.inr;
+    document.getElementById('popup-amount-inr').innerHTML = prices.inr;
     document.getElementById('popup-amount-converted').textContent = prices.converted;
- 
+
     const noteEl = document.getElementById('popup-pay-note');
     const isIndia = (userCountry === 'IN');
- 
+
     if (isIndia) {
       noteEl.innerHTML = `
         💳 <strong style="color:var(--white);">How to pay:</strong><br/>
@@ -1058,32 +1028,19 @@ document.addEventListener('DOMContentLoaded', function() {
         ✅ <span style="font-size:0.82rem; color:var(--purple-light);">No hidden charges · Secure · Pay with card or PayPal balance</span>
       `;
     }
- 
+
     document.getElementById('pay-popup-overlay').classList.add('show');
   }
- 
+
   function closePayPopup() {
     document.getElementById('pay-popup-overlay').classList.remove('show');
   }
- 
+
   function proceedToPayment() {
     window.open(currentPayLink, '_blank');
     closePayPopup();
   }
- 
-  // Update button label based on country
-  const origOpenPopup = openPayPopup;
-  document.addEventListener('DOMContentLoaded', function() {
-    // Update enroll button label after country detected
-    setTimeout(function() {
-      const btn = document.getElementById('pay-popup-btn');
-      if (btn && userCountry !== 'IN') {
-        btn.textContent = 'Pay with PayPal →';
-        btn.style.background = '#0070ba';
-      }
-    }, 2000);
-  });
- 
+
   // Close on overlay click
   document.getElementById('pay-popup-overlay').addEventListener('click', function(e) {
     if (e.target === this) closePayPopup();
