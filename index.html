@@ -1,27 +1,34 @@
 <script>
 const pricing = {
-  IN: { symbol: '₹', p1: '1,499', p2: '1,999', p3: '2,499', w1: '2,000',  w2: '2,800', w3: '3,500' },
-  US: { symbol: '$', p1: '48',    p2: '58',    p3: '72',    w1: '65',     w2: '78',    w3: '90' }
+  IN: { symbol: '₹', p1: '1,499', p2: '1,999', p3: '2,499', w1: '2,000', w2: '2,800', w3: '3,500' },
+  US: { symbol: '$', p1: '48', p2: '58', p3: '72', w1: '65', w2: '78', w3: '90' }
 };
 
 function applyPricing(countryCode) {
-  const p = pricing[countryCode] || pricing['IN'];
+  try {
+    const p = pricing[countryCode] || pricing['IN'];
 
-  document.querySelectorAll('[data-price]').forEach(el => {
-    const key = el.getAttribute('data-price');
-    el.innerHTML = p.symbol + p[key];
-  });
+    document.querySelectorAll('[data-price]').forEach(el => {
+      const key = el.getAttribute('data-price');
+      if (p[key]) {
+        el.innerHTML = p.symbol + p[key];
+      }
+    });
 
-  const badge = document.getElementById('currency-badge');
-  if (badge) {
-    badge.style.display = 'inline-flex';
-    badge.innerHTML = countryCode === 'IN'
-      ? '🇮🇳 Prices shown in INR'
-      : '🌍 International pricing in USD';
+    const badge = document.getElementById('currency-badge');
+    if (badge) {
+      badge.style.display = 'inline-flex';
+      badge.innerHTML = countryCode === 'IN'
+        ? '🇮🇳 Prices shown in INR'
+        : '🌍 International pricing in USD';
+    }
+
+    const dropdown = document.getElementById('currency-switcher');
+    if (dropdown) dropdown.value = countryCode;
+
+  } catch (e) {
+    console.error('Pricing error:', e);
   }
-
-  const dropdown = document.getElementById('currency-switcher');
-  if (dropdown) dropdown.value = countryCode;
 }
 
 function setCurrency(code) {
@@ -30,15 +37,16 @@ function setCurrency(code) {
 }
 
 function initPricing() {
-  // ✅ 1. saved preference
-  const saved = localStorage.getItem('selectedCurrency');
-  if (saved) {
-    applyPricing(saved);
-    return;
+  try {
+    const saved = localStorage.getItem('selectedCurrency');
+    if (saved) {
+      applyPricing(saved);
+    } else {
+      applyPricing('IN'); // default safe
+    }
+  } catch (e) {
+    applyPricing('IN');
   }
-
-  // ✅ 2. FORCE INR DEFAULT (no IP bullshit)
-  applyPricing('IN');
 }
 
 window.addEventListener('DOMContentLoaded', initPricing);
