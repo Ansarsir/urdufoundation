@@ -282,13 +282,143 @@
 #pay-popup-close:hover { color: var(--white); }
  
     @media (max-width: 900px) {
-      .hero, .about, .enroll { grid-template-columns: 1fr; gap: 3rem; }
+      .hero, .about, .enroll { grid-template-columns: 1fr; gap: 2rem; }
       .hero-right { display: none; }
       .courses-grid, .testi-grid { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
       nav .nav-links { display: none; }
-      .trust-bar { gap: 1.5rem; }
+      .trust-bar { gap: 1rem; }
       .enroll-left { position: static; }
+    }
+
+    /* ── MOBILE FIXES ── */
+    @media (max-width: 600px) {
+      /* Hero — remove the massive blank space */
+      .hero {
+        min-height: unset;
+        padding: 5rem 5% 3rem;
+        gap: 1.5rem;
+      }
+      .hero h1 {
+        font-size: 2.4rem;
+        line-height: 1.12;
+        margin-bottom: 1rem;
+      }
+      .hero-sub {
+        font-size: 0.95rem;
+        margin-bottom: 1.8rem;
+      }
+      .hero-eyebrow {
+        font-size: 0.7rem;
+        margin-bottom: 1.2rem;
+      }
+      .hero-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+      .btn-primary, .btn-wa {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+        padding: 0.9rem 1.5rem;
+      }
+
+      /* Nav */
+      nav {
+        padding: 0.8rem 4%;
+      }
+      .nav-logo {
+        font-size: 1.1rem;
+      }
+      .nav-cta {
+        padding: 0.5rem 1rem;
+        font-size: 0.78rem;
+      }
+
+      /* Trust bar — vertical stack on small screens */
+      .trust-bar {
+        flex-direction: column;
+        gap: 0.7rem;
+        padding: 1.2rem 5%;
+        align-items: flex-start;
+      }
+
+      /* Sections */
+      section {
+        padding: 3.5rem 5%;
+      }
+      h2 {
+        font-size: 2rem;
+      }
+
+      /* About */
+      .about {
+        padding: 3.5rem 5%;
+        gap: 2rem;
+      }
+      .aq-urdu {
+        font-size: 2.8rem;
+      }
+
+      /* Course cards */
+      .course-card {
+        padding: 1.5rem;
+      }
+      .course-pricing strong {
+        font-size: 1.8rem;
+      }
+
+      /* Testimonials — 1 col */
+      .testi-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Enroll form */
+      .enroll-form-wrap {
+        padding: 1.8rem 1.2rem;
+      }
+
+      /* How it works — stack on mobile */
+      .how-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Curriculum grid */
+      .curriculum-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Batch schedule grid */
+      .batch-grid {
+        grid-template-columns: 1fr !important;
+        gap: 2rem;
+      }
+
+      /* Founder grid */
+      .founder-grid {
+        grid-template-columns: 1fr !important;
+        gap: 2rem;
+      }
+
+      /* FAQ */
+      .faq-wrap {
+        padding: 0;
+      }
+
+      /* Urgency banner */
+      #urgency-banner {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.8rem;
+        line-height: 1.5;
+      }
+
+      /* WhatsApp float */
+      #wa-float {
+        width: 52px;
+        height: 52px;
+        bottom: 20px;
+        right: 16px;
+      }
     }
   </style>
  
@@ -359,7 +489,7 @@
 <div class="orb orb-3"></div>
  
 <!-- URGENCY BANNER -->
-<div style="background:linear-gradient(90deg,var(--purple),#9333ea);text-align:center;padding:0.6rem 1rem;font-size:0.82rem;font-weight:600;color:white;position:relative;z-index:99;">
+<div id="urgency-banner" style="background:linear-gradient(90deg,var(--purple),#9333ea);text-align:center;padding:0.6rem 1rem;font-size:0.82rem;font-weight:600;color:white;position:relative;z-index:99;">
   🔥 &nbsp;Next batch starts <strong>Monday</strong> — Only <strong>6 spots</strong> remaining! &nbsp;
   <a href="#enroll" style="color:var(--gold-light);text-decoration:underline;font-weight:700;">Reserve your spot →</a>
 </div>
@@ -635,7 +765,7 @@ async function submitToGoogleForm() {
     <h2>How It <em>Works</em></h2>
     <p class="subtitle" style="margin:0 auto;text-align:center;">From inquiry to first class in less than 48 hours.</p>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;max-width:900px;margin:0 auto;">
+  <div class="how-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;max-width:900px;margin:0 auto;">
     <div style="text-align:center;padding:2rem;background:var(--card);border:1px solid var(--border);border-radius:20px;">
       <div style="width:50px;height:50px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.2rem;margin:0 auto 1.2rem;color:white;">1</div>
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-bottom:0.5rem;">Book Free Demo</h3>
@@ -661,7 +791,7 @@ async function submitToGoogleForm() {
     <h2>Our <em>Curriculum</em></h2>
     <p class="subtitle" style="margin:0 auto;text-align:center;">Structured, age-appropriate syllabus designed to build confident Urdu readers and writers.</p>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
+  <div class="curriculum-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
     <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2rem;">
       <div style="display:inline-block;background:var(--purple-soft);border:1px solid var(--border);color:var(--purple-light);padding:0.28rem 0.8rem;border-radius:50px;font-size:0.73rem;font-weight:600;margin-bottom:1.2rem;">Ages 6–9 · Little Beginners</div>
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;margin-bottom:1.2rem;">Foundation Level</h3>
@@ -704,7 +834,7 @@ async function submitToGoogleForm() {
  
 <!-- BATCH SCHEDULE -->
 <section style="background:var(--deep);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;">
+  <div class="batch-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;">
     <div>
       <div class="section-label">Flexible Batches</div>
       <h2>Classes Scheduled <em>Around You</em></h2>
@@ -743,7 +873,7 @@ async function submitToGoogleForm() {
  
 <!-- FOUNDER -->
 <section>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;">
+  <div class="founder-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;">
     <div style="background:var(--card);border:1px solid var(--border);border-radius:24px;padding:2.5rem;text-align:center;position:relative;overflow:hidden;">
       <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--gold-light));"></div>
       <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purple-light));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:700;color:white;margin:0 auto 1.2rem;">A</div>
